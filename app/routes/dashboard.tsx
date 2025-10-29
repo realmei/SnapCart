@@ -8,6 +8,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <Navigation userName="Mei" />
       <Dashboard userName="Mei" />
+      <div>11111</div>
     </div>
   );
 }

@@ -1,17 +1,33 @@
-// // app/state/useApp.tsx
-// import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
+import { useNavigate } from "react-router";
 
-// const AppContext = createContext(null);
-// export const useApp = () => useContext(AppContext);
+type AppContextType = {
+  // isAuthenticated: boolean;
+  userName: string;
+  userEmail: string;
+  onLogin: (name: string, email: string) => void;
+};
 
-// export function AppProvider({ children }) {
-//   const [isAuthenticated, setIsAuthenticated] = useState(false);
-//   const [userName, setUserName] = useState("Selma");
-//   const [userEmail, setUserEmail] = useState("selma@example.com");
-//   // ...handlers here
-//   return (
-//     <AppContext.Provider value={{ isAuthenticated, userName, userEmail }}>
-//       {children}
-//     </AppContext.Provider>
-//   );
-// }
+const AppContext = createContext<AppContextType | null>(null);
+export const useApp = () => useContext(AppContext);
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const navigate = useNavigate();
+
+  const onLogin = (name: string, email: string) => {
+    // setIsAuthenticated(true);
+    setUserName(name);
+    setUserEmail(email);
+    console.log("User logged in:", name, email);
+    navigate("/dashboard");
+  }
+  
+  return (
+    <AppContext.Provider value={{ userName, userEmail, onLogin }}>
+      {children}
+    </AppContext.Provider>
+  );
+}

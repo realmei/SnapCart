@@ -4,22 +4,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { useApp } from "../state/useApp";
 
 interface LoginProps {
-  onLogin: (name: string) => void;
 }
 
-export default function LoginPage({ onLogin }: LoginProps) {
+export default function LoginPage({ }: LoginProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
+  const { onLogin } = useApp()!;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would validate and authenticate here
-    onLogin(name || "Mei");
+    // Validate and authenticate here
+    const mockUserData = { name: name || "Mei", email };
+    onLogin(mockUserData.name, mockUserData.email);
   };
 
   return (
@@ -49,7 +51,7 @@ export default function LoginPage({ onLogin }: LoginProps) {
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Selma"
+                    placeholder="Mei"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required={!isLogin}

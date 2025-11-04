@@ -2,19 +2,11 @@ import { Upload, Loader2 } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 
-interface Item {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  category: string;
-}
-
 interface UploadCardProps {
   uploading: boolean;
   setUploading: React.Dispatch<React.SetStateAction<boolean>>;
   setUploaded: React.Dispatch<React.SetStateAction<boolean>>;
-  setItems: React.Dispatch<React.SetStateAction<Item[]>>;
+  setItems: React.Dispatch<React.SetStateAction<ReceiptItem[]>>;
 }
 
 export function UploadCard({ uploading, setUploading, setUploaded, setItems }: UploadCardProps) {
@@ -57,7 +49,7 @@ export function UploadCard({ uploading, setUploading, setUploaded, setItems }: U
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-blue-500 transition-colors"
+          className={`border-2 border-dashed border-gray-300 rounded-lg p-12 text-center transition-colors ${uploading ? 'bg-gray-100' : 'hover:border-blue-500'}`}
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-4">

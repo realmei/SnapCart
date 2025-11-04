@@ -4,18 +4,10 @@ import { useState } from "react";
 import { UploadCard } from "~/components/upload/UploadCard";
 import { ReceiptReview } from "~/components/upload/ReceiptReview";
 
-interface Item {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  category: string;
-}
-
 export default function UploadPage() {
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<ReceiptItem[]>([]);
   const { userName } = useApp();
 
   const resetUpload = () => {

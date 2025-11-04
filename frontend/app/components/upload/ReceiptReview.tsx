@@ -21,16 +21,8 @@ import { toast } from "sonner"
 import { useNavigate } from "react-router";
 import { Spinner } from "../ui/spinner";
 
-interface Item {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  category: string;
-}
-
 export const ReceiptReview = ({ items, onSave, onCancel }: {
-  items: Item[];
+  items: ReceiptItem[];
   onSave: () => void;
   onCancel: () => void;
 }) => {
@@ -63,7 +55,7 @@ export const ReceiptReview = ({ items, onSave, onCancel }: {
     ));
   };
 
-  const handleSave = () => {
+  const handleSubmit = () => {
     if (loading) return;
     setLoading(true);
     // Simulate save delay
@@ -79,8 +71,6 @@ export const ReceiptReview = ({ items, onSave, onCancel }: {
       onSave();
     }, 500);
   };
-
-  const buttonCls = `flex-1 ${loading ? "pointer-events-none" : "cursor-pointer"}`;
 
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   
@@ -172,13 +162,12 @@ export const ReceiptReview = ({ items, onSave, onCancel }: {
             <span className="text-gray-900">NZD ${total.toFixed(2)}</span>
           </div>
           <div className="flex gap-4">
-            <Button onClick={onCancel} className={buttonCls} variant="outline" disabled={loading}>
-              {loading ? <Spinner /> : ""}
+            <Button onClick={onCancel} className="flex-1" variant="outline" disabled={loading}>
               Cancel
             </Button>
-            <Button onClick={handleSave} className={buttonCls} disabled={loading}>
+            <Button onClick={handleSubmit} className="flex-1" disabled={loading}>
               {loading ? <Spinner /> : ""}
-              Save to Dashboard
+              Submit
             </Button>
           </div>
         </div>

@@ -4,25 +4,15 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { useEffect, useState } from "react";
-import { ReceiptDetailDrawer } from "./ReceiptDetailDrawer";
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext, PaginationEllipsis, PaginationLink } from "../ui/pagination";
-
-interface Receipt {
-  id: string;
-  store: string;
-  date: string;
-  total: number;
-  items: number;
-}
+import { ReceiptDetailDialog } from "./ReceiptDetailDialog";
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from "../ui/pagination";
+import { ALL_MONTHS, ALL_YEARS, RecentReceiptFilters } from "./RecentReceiptFilters";
 
 export const RecentReceipts = () => {
-  const [recentReceipts, setRecentReceipts] = useState<Receipt[]>([]);
-  const [selectedReceipt, setSelectedReceipt] = useState<Receipt|null>(null);
+  // Pagination State
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
-
   const onClickPrevious = () => {
     setPage((p) => Math.max(p - 1, 1));
   };
@@ -30,6 +20,25 @@ export const RecentReceipts = () => {
   const onClickNext = () => {
     setPage((p) => Math.min(p + 1, totalPages));
   };
+
+  // Filter State
+  const [selectedYear, setSelectedYear] = useState(ALL_YEARS);
+  const [selectedMonth, setSelectedMonth] = useState(ALL_MONTHS);
+  const [years, setYears] = useState<string[]>([]);
+
+  const onYearChange = (year: string) => {
+    setSelectedYear(year);
+    setPage(1);
+  };
+
+  const onMonthChange = (month: string) => {
+    setSelectedMonth(month);
+    setPage(1);
+  }
+
+  // Data State
+  const [recentReceipts, setRecentReceipts] = useState<Receipt[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const getData = () => {
     setLoading(true);
@@ -49,36 +58,66 @@ export const RecentReceipts = () => {
           { id: "9", store: "Countdown", date: "2025-01-05", total: 63.20, items: 7 },
           { id: "10", store: "Countdown", date: "2025-01-05", total: 63.20, items: 7 },
         ],
-        "totalPages": 5
+        "totalPages": 5,
+        "years": [ALL_YEARS, "2025"],
       };
       setRecentReceipts(res.data);
       setTotalPages(res.totalPages);
+      setYears(res.years);
       setLoading(false);
     }, 500);
   };
 
-  // 🧠 Simulate backend pagination
   useEffect(() => {
     getData();
-  }, [page]);
+  }, [page, selectedYear, selectedMonth]);
 
-  const onViewReceipt = (receipt:Receipt) => setSelectedReceipt(receipt);
-  const handleCloseReceipt = () => setSelectedReceipt(null);
+  // Receipt Detail Dialog State
+  const [selectedReceipt, setSelectedReceipt] = useState<Receipt|null>(null);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+
+  const onViewReceipt = (receipt:Receipt) => {
+    setSelectedReceipt(receipt);
+    setShowDetailDialog(true);
+  }
+
+  const onCloseReceipt = () => {
+    setSelectedReceipt(null);
+    setShowDetailDialog(false);
+  }
+
+  const onDeleteReceipt = () => {
+    setSelectedReceipt(null);
+    // After deletion, refresh the data
+    getData();
+  }
 
   return (
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Recent Receipts</CardTitle>
-          <CardDescription>Your latest uploaded receipts</CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle>Recent Receipts</CardTitle>
+              <CardDescription>Your latest uploaded receipts</CardDescription>
+            </div>
+            {/* Year & Month Filters */}
+            <RecentReceiptFilters
+              years={years}
+              year={selectedYear}
+              month={selectedMonth}
+              onYearChange={onYearChange}
+              onMonthChange={onMonthChange}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="hidden md:block relative">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Store</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Store</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Items Parsed</TableHead>
                   <TableHead>Action</TableHead>
@@ -87,14 +126,18 @@ export const RecentReceipts = () => {
               <TableBody>
                 {recentReceipts.map((receipt) => (
                   <TableRow key={receipt.id}>
-                    <TableCell>{receipt.store}</TableCell>
                     <TableCell>{new Date(receipt.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{receipt.store}</TableCell>
                     <TableCell>NZD ${receipt.total.toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">{receipt.items} items</Badge>
                     </TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => onViewReceipt(receipt)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onViewReceipt(receipt)}
+                      >
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
@@ -105,12 +148,12 @@ export const RecentReceipts = () => {
             </Table>
             {loading && (
               <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-                <Loader2 className="w-6 h-6 text-gray-500 animate-spin" />
+                <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
               </div>
             )}
           </div>
 
-          {/* 📄 Pagination Controls */}
+          {/* Pagination Controls */}
           <div className="flex justify-center mt-4">
             <Pagination>
               <PaginationContent>
@@ -135,10 +178,11 @@ export const RecentReceipts = () => {
         </CardContent>
       </Card>
 
-      <ReceiptDetailDrawer
-        isOpen={selectedReceipt !== null}
-        onClose={handleCloseReceipt}
+      <ReceiptDetailDialog
+        isOpen={showDetailDialog}
         receipt={selectedReceipt}
+        onClose={onCloseReceipt}
+        onDelete={onDeleteReceipt}
       />
     </>
   );

@@ -78,7 +78,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [checking, setChecking] = useState(true);
-  const { onLogin } = useApp()!;
+  const { onLogin } = useApp();
 
   useEffect(() => {
     mockGetSession().then((data: any) => {

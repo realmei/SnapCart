@@ -49,7 +49,7 @@ export function Navigation({ }: NavigationProps) {
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full cursor-pointer">
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src="" alt={userName} />
                     <AvatarFallback className="bg-blue-600 text-white">

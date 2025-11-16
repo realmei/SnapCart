@@ -116,10 +116,14 @@ const UserMenuDropdownContent = () => {
     setShowProfile(false);
   };
 
-  const logout = () => {
-    onLogout();
-    document.cookie = "sid=; path=/; max-age=0";
-    navigate("/");
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+      onLogout();
+      navigate("/");
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
   };
 
   return (

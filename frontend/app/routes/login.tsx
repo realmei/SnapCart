@@ -17,16 +17,33 @@ export default function LoginPage({ }: LoginProps) {
   const [name, setName] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const mockLogin = new Promise((resolve) => {
-      document.cookie = `sid=111; path=/; max-age=86400;`; // temparily set a session cookie for 1 day
-      setTimeout(resolve, 1000)
-    });
-    mockLogin.then(() => {
-      // already update app state in root.tsx useEffect
+    const apiUrl = import.meta.env.VITE_API_URL || "";
+    try {
+      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
+      const body: any = { email, password };
+      if (!isLogin) body.name = name;
+
+      const res = await fetch(apiUrl + endpoint, {
+        method: "POST",
+        credentials: "include", // Include cookies
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        // show error
+        alert(data.error || "Auth failed");
+        return;
+      }
+
       navigate("/dashboard");
-    });
+    } catch (err) {
+      console.error(err);
+      alert("Network error");
+    }
   };
 
   return (

@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { type Secret } from "jsonwebtoken";
 import crypto from "crypto";
 import { pool } from "../config/db.js";
 import {
@@ -29,16 +29,16 @@ export class AuthService {
       [email]
     );
     const user = userRes.rows[0];
-    if (!user) throw new Error("Invalid credentials");
-
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
     const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) throw new Error("Invalid credentials");
-
+    if (!ok) {
+      throw new Error("Invalid credentials");
+    }
     const accessToken = signAccessToken(user.id);
     const refreshToken = signRefreshToken(user.id);
-
     await saveRefreshToken(user.id, refreshToken);
-
     return {
       user,
       accessToken,
@@ -48,29 +48,26 @@ export class AuthService {
 
   static async refresh(oldToken: string) {
     const payload = jwt.verify(oldToken, process.env.JWT_REFRESH_SECRET!) as any;
-
     const hash = crypto.createHash("sha256").update(oldToken).digest("hex");
     const lookup = await pool.query(
       `SELECT user_id FROM refresh_tokens WHERE token_hash=$1`,
       [hash]
     );
-
-    if (lookup.rowCount === 0) throw new Error("NOT_FOUND");
+    if (lookup.rowCount === 0) {
+      throw new Error("Not found");
+    }
 
     const userId = payload.id;
-
     await deleteRefreshTokenByHash(hash);
 
     const newRefresh = signRefreshToken(userId);
     const newAccess = signAccessToken(userId);
-
     await saveRefreshToken(userId, newRefresh);
 
     const userRes = await pool.query(
       `SELECT id, email, name FROM users WHERE id=$1`,
       [userId]
     );
-
     return {
       user: userRes.rows[0],
       accessToken: newAccess,
@@ -78,13 +75,11 @@ export class AuthService {
     };
   }
 
-  static async me(userId: number) {
-    const userRes = await pool.query(
-      `SELECT id, email, name FROM users WHERE id=$1`,
-      [userId]
-    );
-
-    return userRes.rows[0];
+  static async checkSession(token: string) {
+    const payload: any = jwt.verify(token, process.env.JWT_ACCESS_SECRET as Secret);
+    const userResult = await pool.query("SELECT id, name, email FROM users WHERE id = $1", [payload.id]);
+    const user = userResult.rows[0];
+    return user;
   }
 
   static async logout(token: string) {

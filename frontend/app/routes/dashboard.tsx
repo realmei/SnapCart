@@ -1,4 +1,4 @@
-import { Navigation } from "../components/Navigation";
+import { Navigation } from "../components/nav/Navigation";
 import { useEffect, useState } from "react";
 import { ChartsSection } from "~/components/dashboard/ChartsSection";
 import { GreetingHeader } from "~/components/dashboard/GreetingHeader";

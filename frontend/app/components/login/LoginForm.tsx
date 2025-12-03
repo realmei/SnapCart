@@ -7,12 +7,14 @@ import { useNavigate } from "react-router";
 import { Field, FieldError, FieldLabel } from "../ui/field";
 import { loginSchema } from "./schema";
 import { toast } from "sonner";
+import { useApp } from "~/state/useApp";
 
 export const LoginForm = () => {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
   });
 
+  const { onLogin } = useApp();
   const navigate = useNavigate();
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
@@ -24,14 +26,14 @@ export const LoginForm = () => {
         body: JSON.stringify(data),
       });
 
-      const resData = await res.json();
+      const resJson = await res.json();
       if (!res.ok) {
-        toast.error(resData.error || "Login failed");
+        toast.error(resJson.error || "Login failed");
         return;
       }
 
-      console.log(resData);
-      // navigate("/dashboard");
+      onLogin(resJson.user);
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       console.error(err);
       toast.error("Network error");

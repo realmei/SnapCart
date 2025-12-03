@@ -29,6 +29,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUserName(name);
     setUserEmail(email);
     setUserAvatar(avatar);
+    console.log("User logged in:", user);
   }
 
   const onLogout = () => {

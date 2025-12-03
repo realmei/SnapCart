@@ -1,5 +1,4 @@
 import jwt, { type Secret } from "jsonwebtoken";
-import type { StringValue } from "ms";
 import crypto from "crypto";
 import { pool } from "../config/db.js";
 

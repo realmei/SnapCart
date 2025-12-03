@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { AuthService } from "./auth.service.js";
+// import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 const router: Router = Router();
 
@@ -19,9 +21,9 @@ router.post("/register", async(req, res) => {
   } catch (err: any) {
     console.error(err.toString());
     if (err.code === "23505") {
-      return res.status(409).json({ error: "Email already in use" });
+      return res.status(409).json({ msg: "Email already in use" });
     }
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
@@ -39,15 +41,14 @@ router.post("/login", async(req, res) => {
     res.json({ user });
   } catch (err: any) {
     console.error(err.toString());
-    res.status(401).json({ error: "Invalid credentials" });
+    res.status(401).json({ msg: "Invalid credentials" });
   }
 });
 
 router.post("/refresh", async (req, res) => {
   try {
     const oldToken = req.cookies.refreshToken;
-    const { user, accessToken, refreshToken } =
-      await AuthService.refresh(oldToken);
+    const { user, accessToken, refreshToken } = await AuthService.refresh(oldToken);
 
     res.cookie("accessToken", accessToken, cookieBase);
     res.cookie("refreshToken", refreshToken, {
@@ -58,24 +59,30 @@ router.post("/refresh", async (req, res) => {
     res.json({ user });
   } catch (err: any) {
     console.error(err.toString());
-    res.status(401).json({ error: "Invalid token" });
+    res.status(401).json({ msg: "Invalid token" });
   }
 });
 
-// router.get("/me", authenticate, async (req, res)=> {
-//   const user = await AuthService.me(req.userId!);
-//   res.json({ user });
-// });
-
-router.get("/me", async (req, res) => {
-  console.log("Me endpoint hit");
+router.get("/session", async (req, res) => {
+  const token = req.cookies.accessToken;
+  if (!token) {
+    return res.status(401).json({ msg: "No token"});
+  }
   try {
-    const token = req.cookies.accessToken;
-    const user = await AuthService.me(token);
+    const user = await AuthService.checkSession(token);
+    if (!user) {
+      throw new Error("User not found");
+    }
     res.json({ user });
   } catch (err: any) {
     console.error(err.toString());
-    res.status(401).json({ error: "Invalid token" });
+    if (err instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ msg: "Expired token", expired: true });
+    }
+    if (err instanceof jwt.JsonWebTokenError) {
+      return res.status(401).json({ msg: "Invalid token", expired: true });
+    }
+    res.status(500).json({ msg: "Server error"});
   }
 });
 
@@ -86,7 +93,7 @@ router.post("/logout", async(req, res) => {
   res.clearCookie("accessToken", { path: "/" });
   res.clearCookie("refreshToken", { path: "/" });
 
-  res.json({ ok: true });
+  res.json({ msg: "logout successfully" });
 });
 
 export default router;

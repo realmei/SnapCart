@@ -1,4 +1,4 @@
-import { Navigation } from "../components/Navigation";
+import { Navigation } from "../components/nav/Navigation";
 import { useApp } from "~/state/useApp";
 import { useState } from "react";
 import { UploadCard } from "~/components/upload/UploadCard";

@@ -1,15 +1,16 @@
 import { Upload, Loader2 } from "lucide-react";
 import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface UploadCardProps {
-  uploading: boolean;
-  setUploading: React.Dispatch<React.SetStateAction<boolean>>;
   setUploaded: React.Dispatch<React.SetStateAction<boolean>>;
   setItems: React.Dispatch<React.SetStateAction<ReceiptItem[]>>;
 }
 
-export function UploadCard({ uploading, setUploading, setUploaded, setItems }: UploadCardProps) {
+export function UploadCard({ setUploaded, setItems }: UploadCardProps) {
+  const [uploading, setUploading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -19,17 +20,21 @@ export function UploadCard({ uploading, setUploading, setUploaded, setItems }: U
 
   const handleUpload = async (file: File) => {
     setUploading(true);
-    const res = await fetch("/receipt/upload", {
-      method: "POST",
-      credentials: "include",
-      body: (() => {
-        const formData = new FormData();
-        formData.append("receipt", file);
-        return formData;
-      })(),
-    })
-    const data = await res.json();
-    setItems(data.receipt.items);
+    try {
+      const res = await fetch("/api/receipt/upload", {
+        method: "POST",
+        credentials: "include",
+        body: (() => {
+          const formData = new FormData();
+          formData.append("receipt", file);
+          return formData;
+        })(),
+      });
+      const data = await res.json();
+      setItems(data.receipt.items);
+    } catch (err) {
+      toast.error("Upload failed. Please try again.");
+    }
     setUploading(false);
   };
 

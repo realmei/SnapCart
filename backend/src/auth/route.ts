@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AuthService } from "./auth.service.js";
+import { AuthService } from "./service.js";
 // import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 

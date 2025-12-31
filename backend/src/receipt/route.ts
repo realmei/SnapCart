@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import multer from "multer";
-import { parseReceipt } from "./ocr.js";
+import { parseReceipt } from "./service.js";
 import { pool } from "../config/db.js";
 
 const router: Router = Router();
@@ -14,18 +14,13 @@ router.post(
 
     try {
       const data = await parseReceipt(req.file.path);
-
-      // TODO: parse JSON output from OpenAI if necessary
       const receipt = JSON.parse(data);
-
-      // Store in DB
       const result = {
         vendor: receipt.vendor,
         total: receipt.total,
         date: receipt.date,
         items: JSON.stringify(receipt.items)
       }
-
       res.json(result);
     } catch (err) {
       res.status(500).json({ error: "Failed to parse receipt" });

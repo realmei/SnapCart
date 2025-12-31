@@ -4,7 +4,8 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import morgan from "morgan";
-import authRoutes from "./auth/auth.routes.js";
+import authRoutes from "./auth/route.js";
+import receiptRoutes from "./receipt/route.js";
 
 const app: Express = express();
 app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
@@ -32,7 +33,7 @@ app.use(
 
 // routes
 app.use("/api/auth", authRoutes);
-
+app.use("/api/receipt", receiptRoutes);
 
 const port = process.env.PORT;
 app.listen(process.env.PORT, () => {

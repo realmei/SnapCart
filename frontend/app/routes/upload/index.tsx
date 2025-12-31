@@ -1,14 +1,11 @@
 import { Navigation } from "../../components/nav/Navigation";
-import { useApp } from "~/state/useApp";
 import { useState } from "react";
 import { UploadCard } from "./UploadCard";
 import { ReceiptReview } from "./ReceiptReview";
 
 export default function UploadPage() {
-  const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
   const [items, setItems] = useState<ReceiptItem[]>([]);
-  const { userName } = useApp();
 
   const resetUpload = () => {
     setUploaded(false);
@@ -24,9 +21,7 @@ export default function UploadPage() {
             <h1 className="text-gray-900 mb-2">Upload your receipt</h1>
           </div>
           {!uploaded ? (
-            <UploadCard 
-              uploading={uploading} 
-              setUploading={setUploading} 
+            <UploadCard
               setUploaded={setUploaded} 
               setItems={setItems} 
             />

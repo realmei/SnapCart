@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import jwt, { type Secret } from "jsonwebtoken";
 import crypto from "crypto";
 import { pool } from "../config/db.js";
 import {
@@ -7,6 +6,8 @@ import {
   signRefreshToken,
   saveRefreshToken,
   deleteRefreshTokenByHash,
+  verifyAccessToken,
+  verifyRefreshToken,
 } from "./token.js";
 
 export class AuthService {
@@ -47,7 +48,7 @@ export class AuthService {
   }
 
   static async refresh(oldToken: string) {
-    const payload = jwt.verify(oldToken, process.env.JWT_REFRESH_SECRET as Secret);
+    const payload = verifyRefreshToken(oldToken);
     const hash = crypto.createHash("sha256").update(oldToken).digest("hex");
     const lookup = await pool.query(
       `SELECT user_id FROM refresh_tokens WHERE token_hash=$1`,
@@ -58,11 +59,13 @@ export class AuthService {
     }
     // Validate that DB says this token belongs to this user
     const dbUserId = lookup.rows[0].user_id;
-    const tokenUserId = typeof payload == "object" ? payload.id : null;
+    const tokenUserId = payload?.id;
     if (dbUserId !== tokenUserId) {
-      // security incident, do not reissue
-      await deleteRefreshTokenByHash(hash);
-      throw new Error("Token does not match user");
+      await pool.query(
+        `DELETE FROM refresh_tokens WHERE user_id = $1`,
+        [dbUserId]
+      );
+      throw new Error("Refresh token reuse detected");
     }
     // delete the old refresh token row
     await deleteRefreshTokenByHash(hash);
@@ -82,7 +85,7 @@ export class AuthService {
   }
 
   static async checkSession(token: string) {
-    const payload: any = jwt.verify(token, process.env.JWT_ACCESS_SECRET as Secret);
+    const payload = verifyAccessToken(token);
     const userResult = await pool.query("SELECT id, name, email FROM users WHERE id = $1", [payload.id]);
     const user = userResult.rows[0];
     return user;

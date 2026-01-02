@@ -3,13 +3,14 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
+import { fetchWithAuth } from "~/lib/fetch";
 
 interface UploadCardProps {
   setUploaded: React.Dispatch<React.SetStateAction<boolean>>;
-  setItems: React.Dispatch<React.SetStateAction<ReceiptItem[]>>;
+  setReceiptData: React.Dispatch<React.SetStateAction<Receipt>>;
 }
 
-export function UploadCard({ setUploaded, setItems }: UploadCardProps) {
+export function UploadCard({ setUploaded, setReceiptData }: UploadCardProps) {
   const [uploading, setUploading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,19 +22,20 @@ export function UploadCard({ setUploaded, setItems }: UploadCardProps) {
   const handleUpload = async (file: File) => {
     setUploading(true);
     try {
-      const res = await fetch("/api/receipt/upload", {
+      const res = await fetchWithAuth("/api/receipt/upload", {
         method: "POST",
-        credentials: "include",
         body: (() => {
           const formData = new FormData();
           formData.append("receipt", file);
           return formData;
         })(),
       });
-      const data = await res.json();
-      setItems(data.receipt.items);
+      setReceiptData(res);
+      console.log("Uploaded receipt res:", res);
+      setUploaded(true);
     } catch (err) {
       toast.error("Upload failed. Please try again.");
+      console.error(err);
     }
     setUploading(false);
   };

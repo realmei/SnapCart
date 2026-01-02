@@ -32,10 +32,10 @@ export function ReceiptDetailDialog({ isOpen, receipt, onClose, onDelete }: Rece
     setItems([]);
     setTimeout(() => {
       setItems([
-        { id: "1", name: "Organic Bananas", price: 4.99, quantity: 1, category: "Fresh Produce" },
-        { id: "2", name: "Milk 2L", price: 3.49, quantity: 2, category: "Dairy" },
-        { id: "3", name: "Chicken Breast 500g", price: 12.99, quantity: 1, category: "Meat & Seafood" },
-        { id: "4", name: "Bread Wholemeal", price: 3.20, quantity: 1, category: "Pantry" },
+        { id: "1", name: "Organic Bananas", unit_price: 4.99, total_price: 4.99, quantity: 1, category: "Fresh Produce" },
+        { id: "2", name: "Milk 2L", unit_price: 4.99, total_price: 3.49, quantity: 2, category: "Dairy" },
+        { id: "3", name: "Chicken Breast 500g", unit_price: 4.99, total_price: 12.99, quantity: 1, category: "Meat & Seafood" },
+        { id: "4", name: "Bread Wholemeal", unit_price: 4.99, total_price: 3.20, quantity: 1, category: "Pantry" },
       ]);
       setCategories([
         "Fresh Produce",
@@ -113,7 +113,7 @@ export function ReceiptDetailDialog({ isOpen, receipt, onClose, onDelete }: Rece
               {/* Store Info */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-gray-900 font-medium">{receipt.store}</h3>
+                  <h3 className="text-gray-900 font-medium">{receipt.vendor}</h3>
                   <p className="text-gray-500 text-sm">
                     {new Date(receipt.date).toLocaleDateString()}
                   </p>
@@ -138,7 +138,7 @@ export function ReceiptDetailDialog({ isOpen, receipt, onClose, onDelete }: Rece
                     {items.map((item) => (
                       <TableRow key={item.id}>
                         <TableCell>{item.name}</TableCell>
-                        <TableCell>NZD ${item.price.toFixed(2)}</TableCell>
+                        <TableCell>NZD ${item.unit_price.toFixed(2)}</TableCell>
                         <TableCell>{item.quantity}</TableCell>
                         <TableCell>
                           <Select
@@ -170,7 +170,7 @@ export function ReceiptDetailDialog({ isOpen, receipt, onClose, onDelete }: Rece
                     <div className="flex justify-between">
                       <div className="text-gray-900">{item.name}</div>
                       <div className="text-gray-900 font-medium">
-                        NZD ${item.price.toFixed(2)}
+                        NZD ${item.unit_price.toFixed(2)}
                       </div>
                     </div>
                     <div className="flex justify-between items-center">

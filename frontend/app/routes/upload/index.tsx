@@ -5,11 +5,10 @@ import { ReceiptReview } from "./ReceiptReview";
 
 export default function UploadPage() {
   const [uploaded, setUploaded] = useState(false);
-  const [items, setItems] = useState<ReceiptItem[]>([]);
+  const [receiptData, setReceiptData] = useState<Receipt>({} as Receipt);
 
   const resetUpload = () => {
     setUploaded(false);
-    setItems([]);
   };
 
   return (
@@ -20,13 +19,13 @@ export default function UploadPage() {
           <div className="mb-8">
             <h1 className="text-gray-900 mb-2">Upload your receipt</h1>
           </div>
-          {!uploaded ? (
+          {uploaded ? (
+            <ReceiptReview receiptData={receiptData} onSave={resetUpload} onCancel={resetUpload} />
+          ) : (
             <UploadCard
               setUploaded={setUploaded} 
-              setItems={setItems} 
+              setReceiptData={setReceiptData} 
             />
-          ) : (
-            <ReceiptReview items={items} onSave={resetUpload} onCancel={resetUpload} />
           )}
         </div>
       </div>

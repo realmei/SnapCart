@@ -1,15 +1,16 @@
 interface Receipt {
   id: string;
-  store: string;
+  vendor: string;
   date: string;
   total: number;
-  items: number;
+  items: ReceiptItem[];
 }
 
 interface ReceiptItem {
   id: string;
   name: string;
-  price: number;
+  unit_price: number;
+  total_price: number;
   quantity: number;
   category: string;
 }
